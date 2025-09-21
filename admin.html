@@ -9,7 +9,6 @@
 </head>
 <body>
     <div class="admin-container">
-        <!-- Header -->
         <header class="admin-header">
             <div class="header-content">
                 <div class="logo-section">
@@ -22,17 +21,12 @@
                 </div>
             </div>
         </header>
-
-        <!-- Navegación por Pestañas -->
         <nav class="admin-nav">
             <button class="nav-tab active" data-tab="dashboard">📊 Dashboard</button>
             <button class="nav-tab" data-tab="gallery">📸 Galería</button>
             <button class="nav-tab" data-tab="employees">👥 Empleados</button>
         </nav>
-
-        <!-- Contenido Principal -->
         <main class="admin-content">
-            <!-- Pestaña: Dashboard -->
             <div id="dashboard-content" class="tab-content active">
                 <h2>Dashboard Principal</h2>
                 <div class="charts-grid">
@@ -46,18 +40,12 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Pestaña: Galería de Fotos -->
             <div id="gallery-content" class="tab-content">
                 <h2>Galería de Fotos</h2>
-                
-                <!-- SECCIÓN DE FILTROS -->
                 <div class="gallery-filters">
                     <div class="filter-group">
                         <label for="employeeFilter">Filtrar por Empleado:</label>
-                        <select id="employeeFilter">
-                            <option value="all">Todos los empleados</option>
-                        </select>
+                        <select id="employeeFilter"><option value="all">Todos los empleados</option></select>
                     </div>
                     <div class="filter-group">
                         <label for="startDate">Fecha de Inicio:</label>
@@ -70,26 +58,16 @@
                     <button id="applyFiltersBtn" class="btn-primary">🔍 Aplicar Filtros</button>
                     <button id="clearFiltersBtn" class="btn-secondary">Limpiar</button>
                 </div>
-
-                <!-- GALERÍA DE FOTOS -->
-                <div id="photoGallery" class="photo-gallery">
-                    <p>Selecciona la pestaña para cargar las fotos.</p>
-                </div>
+                <div id="photoGallery" class="photo-gallery"><p>Selecciona la pestaña para cargar las fotos.</p></div>
             </div>
-
-            <!-- Pestaña: Empleados -->
             <div id="employees-content" class="tab-content">
                 <h2>Gestión de Empleados</h2>
-                <div id="employeesGrid" class="employees-grid">
-                    <p>Próximamente: Aquí podrás gestionar a tus empleados.</p>
-                </div>
+                <div id="employeesGrid" class="employees-grid"><p>Próximamente: Aquí podrás gestionar a tus empleados.</p></div>
             </div>
         </main>
     </div>
-
-    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="js/config.js"></script>
+    <!-- Ya no necesitamos config.js -->
     <script src="js/admin.js"></script>
 </body>
 </html>

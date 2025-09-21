@@ -1,78 +1,49 @@
-// Se asume que config.js define SUPABASE_URL y SUPABASE_ANON_KEY
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+document.addEventListener('DOMContentLoaded', () => {
+    const SUPABASE_URL = 'https://depkkpxkbpgbvzylcdcn.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlcGtrcHhrYnBnYnZ6eWxjZGNuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgzNzEzNjgsImV4cCI6MjA3Mzk0NzM2OH0.n8CDtIA-If4dSjLuRRG5N0y1IolPSMx44qD7Y3odV28';
+    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY );
 
-const loginForm = document.getElementById('loginForm');
-const loginButton = document.getElementById('loginButton');
-const buttonText = loginButton.querySelector('span');
-const errorMessageDiv = document.getElementById('errorMessage');
+    const loginForm = document.getElementById('loginForm');
+    const errorMessage = document.getElementById('errorMessage');
 
-loginForm.addEventListener('submit', async (event) => {
-    event.preventDefault();
-    setLoading(true);
-    
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
+    loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        errorMessage.textContent = '';
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
 
-    try {
-        // 1. Autenticar al usuario con su email y contraseña
-        const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-            email: email,
-            password: password,
-        });
+        try {
+            const { data: authData, error: authError } = await supabase.auth.signInWithPassword({ email, password });
+            if (authError) throw authError;
 
-        if (authError) throw new Error('Credenciales incorrectas. Verifica tu email y contraseña.');
-        if (!authData.user) throw new Error('No se pudo verificar el usuario.');
+            const { data: profileData, error: profileError } = await supabase
+                .from('user_profiles')
+                .select('role, full_name')
+                .eq('user_id', authData.user.id)
+                .single();
+            
+            if (profileError || !profileData) {
+                throw new Error('Este usuario no tiene un perfil asignado en el sistema.');
+            }
 
-        // 2. Obtener el perfil del usuario de la tabla 'user_profiles'
-        //    (Esta consulta ya es compatible con tu estructura de tabla)
-        const { data: profileData, error: profileError } = await supabase
-            .from('user_profiles')
-            .select('user_id, full_name, role') // Seleccionamos solo las columnas que necesitamos
-            .eq('user_id', authData.user.id)    // Buscamos por la columna 'user_id'
-            .single();
+            const sessionData = {
+                id: authData.user.id,
+                email: authData.user.email,
+                role: profileData.role,
+                full_name: profileData.full_name
+            };
+            localStorage.setItem('userSession', JSON.stringify(sessionData));
 
-        // Si no se encuentra un perfil, el login falla
-        if (profileError || !profileData) {
-            throw new Error('Este usuario no tiene un perfil asignado en el sistema.');
+            if (profileData.role === 'admin') {
+                window.location.href = 'admin.html';
+            } else if (profileData.role === 'roomboy') {
+                window.location.href = 'roomboy-app.html';
+            } else {
+                throw new Error('Rol de usuario no reconocido.');
+            }
+
+        } catch (error) {
+            errorMessage.textContent = error.message;
         }
-
-        // 3. Guardar la sesión del usuario en localStorage
-        const userSession = {
-            id: profileData.user_id, // Usamos el user_id que obtuvimos
-            name: profileData.full_name,
-            role: profileData.role,
-        };
-        localStorage.setItem('userSession', JSON.stringify(userSession));
-
-        // 4. Redirigir según el rol
-        if (profileData.role === 'admin') {
-            window.location.href = 'admin.html';
-        } else if (profileData.role === 'roomboy') {
-            window.location.href = 'roomboy-app.html';
-        } else {
-            throw new Error('Rol de usuario no reconocido.');
-        }
-
-    } catch (error) {
-        console.error('Error de inicio de sesión:', error.message);
-        showError(error.message);
-        setLoading(false);
-    }
+    });
 });
-
-function setLoading(isLoading) {
-    if (isLoading) {
-        loginButton.disabled = true;
-        buttonText.textContent = 'Verificando...';
-    } else {
-        loginButton.disabled = false;
-        buttonText.textContent = 'Entrar';
-    }
-}
-
-function showError(message) {
-    errorMessageDiv.textContent = message;
-    errorMessageDiv.style.display = 'block';
-}
-
-

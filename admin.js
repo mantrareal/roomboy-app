@@ -1,9 +1,7 @@
-// js/admin.js - VERSIÓN CORREGIDA Y COMPLETA
-
 document.addEventListener('DOMContentLoaded', () => {
-    // --- INICIALIZACIÓN Y AUTENTICACIÓN ---
-    // ¡CORRECCIÓN! Se inicializa Supabase correctamente.
-    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const SUPABASE_URL = 'https://depkkpxkbpgbvzylcdcn.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlcGtrcHhrYnBnYnZ6eWxjZGNuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgzNzEzNjgsImV4cCI6MjA3Mzk0NzM2OH0.n8CDtIA-If4dSjLuRRG5N0y1IolPSMx44qD7Y3odV28';
+    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY );
 
     const session = localStorage.getItem('userSession');
     if (!session) {
@@ -13,9 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const currentUser = JSON.parse(session);
     
     const adminNameEl = document.getElementById('adminName');
-    if (adminNameEl) {
-        adminNameEl.textContent = currentUser.full_name || 'Admin';
-    }
+    if (adminNameEl) adminNameEl.textContent = currentUser.full_name || 'Admin';
 
     const logoutButton = document.getElementById('logoutButton');
     if (logoutButton) {
@@ -25,7 +21,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- NAVEGACIÓN POR PESTAÑAS ---
     const tabs = document.querySelectorAll('.nav-tab');
     const tabContents = document.querySelectorAll('.tab-content');
 
@@ -33,16 +28,11 @@ document.addEventListener('DOMContentLoaded', () => {
         tab.addEventListener('click', () => {
             tabs.forEach(t => t.classList.remove('active'));
             tab.classList.add('active');
-
             const targetId = `${tab.dataset.tab}-content`;
             tabContents.forEach(content => {
                 content.classList.remove('active');
-                if (content.id === targetId) {
-                    content.classList.add('active');
-                }
+                if (content.id === targetId) content.classList.add('active');
             });
-
-            // Cargar contenido dinámico al cambiar de pestaña
             if (tab.dataset.tab === 'gallery') {
                 loadGalleryPhotos();
                 populateEmployeeFilter();
@@ -52,64 +42,26 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // --- LÓGICA DEL DASHBOARD (GRÁFICAS) ---
     let dailyComplianceChart, employeePerformanceChart;
 
     async function loadDashboardCharts() {
-        // Datos de ejemplo. Reemplazar con datos reales de Supabase.
-        const dailyData = {
-            labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
-            values: [18, 19, 15, 17, 16, 20, 19]
-        };
-        const employeeData = {
-            labels: ['Ana', 'Luis', 'Carlos', 'Sofía', 'Pedro'],
-            values: [25, 22, 20, 18, 15]
-        };
-
-        // Gráfica de Cumplimiento Diario
+        const dailyData = { labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'], values: [18, 19, 15, 17, 16, 20, 19] };
+        const employeeData = { labels: ['Ana', 'Luis', 'Carlos', 'Sofía', 'Pedro'], values: [25, 22, 20, 18, 15] };
         const dailyCtx = document.getElementById('dailyComplianceChart').getContext('2d');
         if (dailyComplianceChart) dailyComplianceChart.destroy();
         dailyComplianceChart = new Chart(dailyCtx, {
             type: 'line',
-            data: {
-                labels: dailyData.labels,
-                datasets: [{
-                    label: 'Tareas Completadas',
-                    data: dailyData.values,
-                    borderColor: 'var(--primary-color)',
-                    backgroundColor: 'rgba(233, 30, 99, 0.1)',
-                    fill: true,
-                    tension: 0.4
-                }]
-            }
+            data: { labels: dailyData.labels, datasets: [{ label: 'Tareas Completadas', data: dailyData.values, borderColor: '#E91E63', backgroundColor: 'rgba(233, 30, 99, 0.1)', fill: true, tension: 0.4 }] }
         });
-
-        // Gráfica de Rendimiento de Empleados
         const employeeCtx = document.getElementById('employeePerformanceChart').getContext('2d');
         if (employeePerformanceChart) employeePerformanceChart.destroy();
         employeePerformanceChart = new Chart(employeeCtx, {
             type: 'bar',
-            data: {
-                labels: employeeData.labels,
-                datasets: [{
-                    label: 'Fotos Subidas este Mes',
-                    data: employeeData.values,
-                    backgroundColor: [
-                        'rgba(233, 30, 99, 0.7)',
-                        'rgba(63, 81, 181, 0.7)',
-                        'rgba(76, 175, 80, 0.7)',
-                        'rgba(255, 152, 0, 0.7)',
-                        'rgba(156, 39, 176, 0.7)'
-                    ]
-                }]
-            },
-            options: {
-                indexAxis: 'y',
-            }
+            data: { labels: employeeData.labels, datasets: [{ label: 'Fotos Subidas este Mes', data: employeeData.values, backgroundColor: ['rgba(233, 30, 99, 0.7)', 'rgba(63, 81, 181, 0.7)', 'rgba(76, 175, 80, 0.7)', 'rgba(255, 152, 0, 0.7)', 'rgba(156, 39, 176, 0.7)'] }] },
+            options: { indexAxis: 'y' }
         });
     }
 
-    // --- LÓGICA DE LA GALERÍA ---
     const gallery = document.getElementById('photoGallery');
     const employeeFilter = document.getElementById('employeeFilter');
     const startDateInput = document.getElementById('startDate');
@@ -182,15 +134,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- CARGA INICIAL ---
     const activeTab = document.querySelector('.nav-tab.active');
-    if (activeTab) {
-        if (activeTab.dataset.tab === 'gallery') {
-            loadGalleryPhotos();
-            populateEmployeeFilter();
-        } else if (activeTab.dataset.tab === 'dashboard') {
-            loadDashboardCharts();
-        }
+    if (activeTab && activeTab.dataset.tab === 'dashboard') {
+        loadDashboardCharts();
     }
 });
 
