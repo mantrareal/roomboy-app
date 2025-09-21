@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Administrativo - México Destination Club</title>
+    <link rel="stylesheet" href="css/admin.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Header -->
+        <header class="admin-header">
+            <div class="header-content">
+                <div class="logo-section">
+                    <h1>🏨 México Destination Club</h1>
+                    <p>Panel Administrativo</p>
+                </div>
+                <div class="user-info">
+                    <span id="adminName">Admin</span>
+                    <button id="logoutButton" class="logout-btn">🚪 Salir</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Navegación por Pestañas -->
+        <nav class="admin-nav">
+            <button class="nav-tab active" data-tab="dashboard">📊 Dashboard</button>
+            <button class="nav-tab" data-tab="gallery">📸 Galería</button>
+            <button class="nav-tab" data-tab="employees">👥 Empleados</button>
+        </nav>
+
+        <!-- Contenido Principal -->
+        <main class="admin-content">
+            <!-- Pestaña: Dashboard -->
+            <div id="dashboard-content" class="tab-content active">
+                <h2>Dashboard Principal</h2>
+                <div class="charts-grid">
+                    <div class="chart-container">
+                        <h3>📈 Cumplimiento Diario (Últimos 7 días )</h3>
+                        <canvas id="dailyComplianceChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h3>🏆 Top 5 Empleados (Este Mes)</h3>
+                        <canvas id="employeePerformanceChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pestaña: Galería de Fotos -->
+            <div id="gallery-content" class="tab-content">
+                <h2>Galería de Fotos</h2>
+                
+                <!-- SECCIÓN DE FILTROS -->
+                <div class="gallery-filters">
+                    <div class="filter-group">
+                        <label for="employeeFilter">Filtrar por Empleado:</label>
+                        <select id="employeeFilter">
+                            <option value="all">Todos los empleados</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="startDate">Fecha de Inicio:</label>
+                        <input type="date" id="startDate">
+                    </div>
+                    <div class="filter-group">
+                        <label for="endDate">Fecha de Fin:</label>
+                        <input type="date" id="endDate">
+                    </div>
+                    <button id="applyFiltersBtn" class="btn-primary">🔍 Aplicar Filtros</button>
+                    <button id="clearFiltersBtn" class="btn-secondary">Limpiar</button>
+                </div>
+
+                <!-- GALERÍA DE FOTOS -->
+                <div id="photoGallery" class="photo-gallery">
+                    <p>Selecciona la pestaña para cargar las fotos.</p>
+                </div>
+            </div>
+
+            <!-- Pestaña: Empleados -->
+            <div id="employees-content" class="tab-content">
+                <h2>Gestión de Empleados</h2>
+                <div id="employeesGrid" class="employees-grid">
+                    <p>Próximamente: Aquí podrás gestionar a tus empleados.</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/config.js"></script>
+    <script src="js/admin.js"></script>
+</body>
+</html>

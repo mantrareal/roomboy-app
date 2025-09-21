@@ -1,91 +1,168 @@
-// NOTA: Este es un esqueleto funcional para tu admin.js.
-// Deberás conectar las funciones a tu base de datos Supabase.
-
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('Panel de Administrador cargado.');
+    const supabaseUrl = SUPABASE_URL;
+    const supabaseKey = SUPABASE_ANON_KEY;
+    const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
-    // Lógica para manejar el cambio de pestañas
+    // --- AUTENTICACIÓN Y DATOS DE USUARIO ---
+    const session = localStorage.getItem('userSession');
+    if (!session) {
+        window.location.href = 'index.html';
+        return;
+    }
+    const currentUser = JSON.parse(session);
+    
+    const adminNameEl = document.getElementById('adminName');
+    if (adminNameEl) {
+        adminNameEl.textContent = currentUser.full_name || 'Admin';
+    }
+
+    const logoutButton = document.getElementById('logoutButton');
+    if (logoutButton) {
+        logoutButton.addEventListener('click', () => {
+            localStorage.removeItem('userSession');
+            window.location.href = 'index.html';
+        });
+    }
+
+    // --- NAVEGACIÓN POR PESTAÑAS ---
     const tabs = document.querySelectorAll('.nav-tab');
     const tabContents = document.querySelectorAll('.tab-content');
 
     tabs.forEach(tab => {
         tab.addEventListener('click', () => {
-            // Quitar clase activa de todas las pestañas y contenidos
             tabs.forEach(t => t.classList.remove('active'));
-            tabContents.forEach(c => c.classList.remove('active'));
-
-            // Añadir clase activa a la pestaña y contenido seleccionados
             tab.classList.add('active');
-            const targetContentId = `${tab.dataset.tab}-content`;
-            document.getElementById(targetContentId).classList.add('active');
-            
-            console.log(`Cambiando a la pestaña: ${tab.dataset.tab}`);
-            // Aquí puedes llamar a funciones para cargar datos de la pestaña activa
-            // Ejemplo: if (tab.dataset.tab === 'gallery') loadGalleryPhotos();
+
+            const targetId = `${tab.dataset.tab}-content`;
+            tabContents.forEach(content => {
+                content.classList.remove('active');
+                if (content.id === targetId) {
+                    content.classList.add('active');
+                }
+            });
+
+            // Cargar contenido dinámico al cambiar de pestaña
+            if (tab.dataset.tab === 'gallery') {
+                loadGalleryPhotos();
+                populateEmployeeFilter();
+            } else if (tab.dataset.tab === 'dashboard') {
+                // Lógica para cargar gráficos del dashboard
+            }
         });
     });
 
-    // Cargar datos iniciales para la primera pestaña (Galería)
-    loadInitialData();
+    // --- LÓGICA DE LA GALERÍA ---
+    const gallery = document.getElementById('photoGallery');
+    const employeeFilter = document.getElementById('employeeFilter');
+    const startDateInput = document.getElementById('startDate');
+    const endDateInput = document.getElementById('endDate');
+    const applyFiltersBtn = document.getElementById('applyFiltersBtn');
+    const clearFiltersBtn = document.getElementById('clearFiltersBtn');
+
+    async function loadGalleryPhotos() {
+        if (!gallery) return;
+        gallery.innerHTML = '<p>Cargando fotos...</p>';
+
+        try {
+            let query = supabase
+                .from('task_photos')
+                .select(`
+                    id, created_at, photo_url, table_number, status,
+                    user_profiles ( full_name )
+                `)
+                .order('created_at', { ascending: false });
+
+            // Aplicar filtros
+            const employeeId = employeeFilter.value;
+            const startDate = startDateInput.value;
+            const endDate = endDateInput.value;
+
+            if (employeeId !== 'all') {
+                query = query.eq('user_id', employeeId);
+            }
+            if (startDate) {
+                query = query.gte('created_at', new Date(startDate).toISOString());
+            }
+            if (endDate) {
+                // Añadir un día para incluir todo el día de fin
+                const end = new Date(endDate);
+                end.setDate(end.getDate() + 1);
+                query = query.lt('created_at', end.toISOString());
+            }
+
+            const { data: photos, error } = await query.limit(100);
+
+            if (error) throw error;
+
+            if (photos.length === 0) {
+                gallery.innerHTML = '<p>No se han encontrado fotos con los filtros seleccionados.</p>';
+                return;
+            }
+
+            gallery.innerHTML = photos.map(photo => `
+                <div class="photo-card">
+                    <img src="${photo.photo_url}" alt="Foto de verificación" loading="lazy" onclick="openPhotoModal('${photo.photo_url}')">
+                    <div class="photo-details">
+                        <p><strong>Empleado:</strong> ${photo.user_profiles ? photo.user_profiles.full_name : 'Desconocido'}</p>
+                        <p><strong>Mesa:</strong> ${photo.table_number || 'N/A'}</p>
+                        <p><strong>Fecha:</strong> ${new Date(photo.created_at).toLocaleString()}</p>
+                        <p><strong>Estado:</strong> <span class="status-label status-${photo.status || 'pending'}">${photo.status || 'pendiente'}</span></p>
+                    </div>
+                </div>
+            `).join('');
+
+        } catch (error) {
+            console.error('Error cargando la galería:', error);
+            gallery.innerHTML = '<p style="color: red;">Error al cargar las fotos.</p>';
+        }
+    }
+
+    async function populateEmployeeFilter() {
+        if (!employeeFilter) return;
+        try {
+            const { data: employees, error } = await supabase
+                .from('user_profiles')
+                .select('user_id, full_name')
+                .eq('role', 'roomboy')
+                .order('full_name');
+
+            if (error) throw error;
+
+            // Evitar duplicar opciones si ya se cargaron
+            if (employeeFilter.options.length > 1) return;
+
+            employees.forEach(emp => {
+                const option = document.createElement('option');
+                option.value = emp.user_id;
+                option.textContent = emp.full_name;
+                employeeFilter.appendChild(option);
+            });
+        } catch (error) {
+            console.error('Error cargando filtro de empleados:', error);
+        }
+    }
+
+    if (applyFiltersBtn) {
+        applyFiltersBtn.addEventListener('click', loadGalleryPhotos);
+    }
+
+    if (clearFiltersBtn) {
+        clearFiltersBtn.addEventListener('click', () => {
+            employeeFilter.value = 'all';
+            startDateInput.value = '';
+            endDateInput.value = '';
+            loadGalleryPhotos();
+        });
+    }
+
+    // Cargar contenido de la pestaña activa al inicio
+    const activeTab = document.querySelector('.nav-tab.active');
+    if (activeTab && activeTab.dataset.tab === 'gallery') {
+        loadGalleryPhotos();
+        populateEmployeeFilter();
+    }
 });
 
-function loadInitialData() {
-    // Simula la carga del nombre del administrador
-    const adminNameEl = document.getElementById('adminName');
-    if (adminNameEl) {
-        adminNameEl.textContent = 'Admin'; // Reemplazar con el nombre real del usuario
-    }
-    
-    // Simula la carga de datos para los gráficos
-    loadCharts();
+function openPhotoModal(imageUrl) {
+    window.open(imageUrl, '_blank');
 }
-
-function loadCharts() {
-    // Gráfico de Cumplimiento Diario (Ejemplo)
-    const dailyCtx = document.getElementById('dailyComplianceChart')?.getContext('2d');
-    if (dailyCtx) {
-        new Chart(dailyCtx, {
-            type: 'line',
-            data: {
-                labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
-                datasets: [{
-                    label: 'Tareas Completadas',
-                    data: [12, 19, 3, 5, 2, 3, 9], // Datos de ejemplo
-                    borderColor: '#E91E63',
-                    tension: 0.1
-                }]
-            }
-        });
-    }
-
-    // Gráfico de Rendimiento por Empleado (Ejemplo)
-    const employeeCtx = document.getElementById('employeePerformanceChart')?.getContext('2d');
-    if (employeeCtx) {
-        new Chart(employeeCtx, {
-            type: 'bar',
-            data: {
-                labels: ['Juan', 'Ana', 'Pedro', 'Luis', 'Maria'], // Nombres de ejemplo
-                datasets: [{
-                    label: 'Fotos Subidas (Semana)',
-                    data: [10, 8, 12, 6, 14], // Datos de ejemplo
-                    backgroundColor: 'rgba(233, 30, 99, 0.5)',
-                }]
-            }
-        });
-    }
-}
-
-function logout() {
-    // Lógica para cerrar sesión
-    if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
-        // Limpia la sesión guardada (si usas localStorage)
-        localStorage.removeItem('userSession');
-        // Redirige a la página de inicio de sesión
-        window.location.href = 'index.html';
-    }
-}
-
-// Aquí deberías añadir el resto de tus funciones:
-// - Cargar fotos en la galería (loadGalleryPhotos)
-// - Cargar empleados (loadEmployees)
-// - Funciones para los modales, etc.
