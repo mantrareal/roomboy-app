@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Room Boy App - México Destination Club</title>
+    
+    <!-- CORRECCIÓN: El CSS ahora está en un archivo externo -->
+    <link rel="stylesheet" href="css/roomboy-app.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="app-header">
+        <div class="header-content">
+            <div class="logo">
+                <h1>🏨 Room Boy App</h1>
+                <p>México Destination Club</p>
+            </div>
+            <div class="header-buttons">
+                <button onclick="switchToDashboard()" class="switch-btn">🖥️ Dashboard</button>
+                <button onclick="logout()" class="logout-btn">🚪 Salir</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Contenedor Principal -->
+    <div class="main-container">
+        <div class="welcome-card">
+            <h2>¡Hola, <span id="userName">Room Boy</span>! 👋</h2>
+            <p>Sube tus fotos de verificación diarias</p>
+        </div>
+
+        <div class="daily-counter">
+            <div class="counter-label">Fotos subidas hoy</div>
+            <div class="counter-display"><span id="photoCount">0</span>/2</div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+            </div>
+        </div>
+
+        <div id="messageContainer"></div>
+
+        <div class="upload-section" id="uploadSection">
+            <h3>📸 Subir Nueva Foto</h3>
+            <input type="number" id="tableNumber" class="table-input" placeholder="Número de mesa (1-150)" min="1" max="150">
+            <div class="upload-area" onclick="triggerFileInput()" id="uploadArea">
+                <div class="upload-icon">📷</div>
+                <p><strong>Toca para tomar/seleccionar foto</strong></p>
+                <p>Máximo 2 fotos por día</p>
+            </div>
+            <input type="file" id="photoInput" accept="image/*" capture="environment">
+            <img id="photoPreview" class="photo-preview" style="display: none;">
+            <button id="uploadBtn" class="upload-btn" onclick="uploadPhoto()" disabled>📤 Subir Foto</button>
+        </div>
+
+        <div class="today-photos">
+            <h3>📅 Mis fotos de hoy</h3>
+            <div id="todayPhotoGrid" class="photo-grid">
+                <p>Aún no has subido fotos hoy</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- CORRECCIÓN: Scripts movidos al final y enlazados externamente -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/config.js"></script>
+    <script src="js/roomboy-app.js"></script>
+</body>
+</html>

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - México Destination Club</title>
+    
+    <!-- Enlazamos el nuevo archivo CSS para el login -->
+    <link rel="stylesheet" href="css/login.css">
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="logo-header">
+                <h1>🏨 México Destination Club</h1>
+                <p>Bienvenido, por favor inicia sesión</p>
+            </div>
+            
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="email">Correo Electrónico</label>
+                    <input type="email" id="email" name="email" required autocomplete="email">
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Contraseña</label>
+                    <input type="password" id="password" name="password" required autocomplete="current-password">
+                </div>
+                
+                <!-- Contenedor para mensajes de error -->
+                <div id="errorMessage" class="error-message"></div>
+                
+                <button type="submit" id="loginButton" class="login-btn">
+                    <span>Entrar</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Scripts necesarios para la lógica de login -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/config.js"></script>
+    <script src="js/login.js"></script>
+</body>
+</html>
